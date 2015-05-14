@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <body>
+    <p>OpenForecast is a package of general purpose, forecasting models
+    written in Java that can be applied to any data series. One of the design
+    goals is to make it easy for a developer to use in an application even if
+    they do not understand, or care to understand, the differences between the
+    different forecasting models available.</p>
+
+    <p>The general steps involved in using OpenForecast are as follows:</p>
+
+    <ul>
+      <li>Create a {@link net.sourceforge.openforecast.DataSet} object.</li>
+      <li>Add to the data set object a series of {@link net.sourceforge.openforecast.DataPoint} objects that define a series of observations.</li>
+      <li>Using the static {@link net.sourceforge.openforecast.Forecaster#getBestForecast getBestForecast} method of {@link net.sourceforge.openforecast.Forecaster}, obtain a reference to the most appropriate forecast model for your data set.</li>
+      <li>Use the {@link net.sourceforge.openforecast.ForecastingModel#forecast forecast} method of this {@link net.sourceforge.openforecast.ForecastingModel} to forecast additional values.</li>
+    </ul>
+
+    <p>That's all there is to it.</p>
+
+    <p>Alternatively, if you want to force the application of a specific forecasting model, then refer to the class implementing that model in the {@link net.sourceforge.openforecast.models} package.</p>
+
+    <h2>Packaging of OpenForecast</h2>
+
+    <p>OpenForecast is primarily a Java library - a JAR file named, <code>OpenForecast-</code><em>{version}</em><code>.jar</code> - intended for use in other Java applications, including web applications.</p>
+
+    <p>A simple GUI is also being implemented for OpenForecast. Since the main focus of the OpenForecast project is to develop a powerful forecasting library, the UI code is not bundled with the main JAR file. [Since it's open source you can change this packaging if you want.] As a result, the OpenForecast UI is packaged in the JAR file, <code>OpenForecastUI-</code><em>{version}</em><code>.jar</code>.</p>
+
+    <p>Additionally, OpenForecast also comes with a test suite and some examples showing how to use it to generate forecasts. Neither of these are packaged separately, since it is not expected that you'll ever need to include these directly in your application(s).</p>
+
+    <p>Although OpenForecast is distributed primarily as two JAR files - one for the core library and another for the OpenForecast UI - the API documentation here includes all classes in both of these JARs. Everything in the {@link net.sourceforge.openforecast.ui} package (and subpackages) forms part of the OpenForecast UI, and is <em>not</em> included in the core library. All other packages comprise the main OpenForecast library. [Note that the OpenForecast UI package is still in the early phases of development and has not yet been released.]</p>
+
+    <h2>Updates</h2>
+
+    <p>You can always download the latest version of OpenForecast from the <a href="http://openforecast.sf.net/" target="_blank">OpenForecast web site</a> on <a href="http://www.sourceforge.net/" target="_blank">SourceForge.net</a>.</p>
+  </body>
+</html>

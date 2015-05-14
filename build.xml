@@ -1,0 +1,232 @@
+<project name="OpenForecast" default="test" basedir=".">
+  <description>
+    Build file for OpenForecast, an open source forecasting system.
+  </description>
+
+  <!-- Initialize global properties for this build -->
+  <property name="version"    value="0.5.0"/>
+
+  <property name="src"        location="src"/>
+  <property name="examples"   location="examples"/>
+  <property name="test-src"   location="test"/>
+  <property name="lib"        location="lib"/>
+
+  <property name="build"      location="build"/>
+  <property name="docs"       location="docs"/>
+  <property name="dist"       location="dist"/>
+
+  <property name="jfreechart.jar" location="${lib}/jfreechart-1.0.13.jar"/>
+  <property name="jcommon.jar"    location="${lib}/jcommon-1.0.16.jar"/>
+  <property name="junit.jar"      location="${lib}/junit-3.8.1.jar"/>
+
+
+  <!-- Initialize derived properties -->
+  <property name="OpenForecast.jar"
+                location="${dist}/OpenForecast-${version}.jar" />
+  <property name="OpenForecastUI.jar"
+                location="${dist}/OpenForecastUI-${version}.jar" />
+  <property name="OpenForecast-src.jar"
+                location="${dist}/OpenForecast-${version}-src.jar" />
+
+  <!-- Initialize base CLASSPATH for use throughout.                    -->
+  <!-- JFreeChart libraries are required for compilation and to run the -->
+  <!--  samples and UI, but not for using the main library (unless of   -->
+  <!--  course the JFreeChart classes are used by your app.)            -->
+  <path id="base.classpath">
+    <pathelement location="${build}/classes"/>
+    <pathelement path="${java.class.path}/"/>
+    <pathelement path="${jfreechart.jar}"/>
+    <pathelement path="${jcommon.jar}"/>
+  </path>
+
+  <!--====================================================================-->
+  <!-- Displays usage information                                         -->
+  <!--====================================================================-->
+  <target name="usage">
+    <echo message="compile  Compiles core library source files"/>
+<!--<echo message="compile-gui  Compiles OpenForecast UI source files"/>-->
+    <echo message="test     Compile and run the tests"/>
+    <echo message="examples Compiles example source files"/>
+    <echo message="docs     Generates javadocs"/>
+    <echo message="dist     Builds files for distribution"/>
+    <echo message="clean    Removes all temporary and build files"/>
+    <echo message="usage    Displays this usage information"/>
+  </target>
+  <target name="help" depends="usage" description="alias for usage"/>
+
+
+  <!--====================================================================-->
+  <!-- Initializes directories for building and testing                   -->
+  <!--====================================================================-->
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+    <mkdir dir="${build}/classes"/>  <!-- Main OpenForecast classes -->
+    <mkdir dir="${build}/examples"/> <!-- Example classes           -->
+    <mkdir dir="${build}/test"/>     <!-- Test classes              -->
+    <mkdir dir="${build}/ui"/>       <!-- OpenForecast UI classes   -->
+  </target>
+
+
+  <!--====================================================================-->
+  <!-- Compiles core Java source files (excluding UI, tests and examples) -->
+  <!--====================================================================-->
+  <target name="compile" depends="init"
+          description="compile the primary OpenForecast source files" >
+    <!-- Compile the java code from ${src} into ${build}/classes -->
+    <javac srcdir="${src}/net/sourceforge/openforecast"
+           destdir="${build}/classes" debug="on" deprecation="on"
+           excludes="ui/**">
+      <classpath refid="base.classpath" />
+    </javac>
+  </target>
+
+
+  <!--====================================================================-->
+  <!-- Compiles GUI source files                                          -->
+  <!--====================================================================-->
+  <target name="compile-gui" depends="compile"
+          description="compile the OpenForecast UI source files" >
+    <!-- Compile the java code from ${src} into ${build}/ui -->
+    <javac srcdir="${src}/net/sourceforge/openforecast/ui"
+           destdir="${build}/ui" debug="on" deprecation="on">
+      <classpath refid="base.classpath" />
+    </javac>
+  </target>
+
+
+  <!--====================================================================-->
+  <!-- Compile and run all OpenForecast tests                             -->
+  <!--====================================================================-->
+  <target name="test" depends="compile"
+          description="compile and run tests">
+    <javac srcdir="${test-src}" destdir="${build}/test"
+           debug="on" deprecation="on">
+      <classpath>
+        <pathelement path="${build}/test"/>
+        <pathelement location="${junit.jar}"/>
+        <path refid="base.classpath" />
+      </classpath>
+    </javac>
+
+    <!-- CLASSPATH must include the JUnit classes to run the tests -->
+    <java classname="junit.textui.TestRunner" fork="true">
+      <classpath>
+        <pathelement path="${build}/test"/>
+        <pathelement location="${junit.jar}"/>
+        <path refid="base.classpath" />
+      </classpath>
+      <arg value="net.sourceforge.openforecast.tests.OpenForecastTestSuite"/>
+    </java>
+  </target>
+
+
+  <!--====================================================================-->
+  <!-- Compiles sample/demo programs                                      -->
+  <!--====================================================================-->
+  <target name="examples" depends="compile"
+          description="compile sample programs">
+    <javac srcdir="${examples}/net/sourceforge/openforecast"
+           destdir="${build}/examples" deprecation="on">
+      <classpath refid="base.classpath" />
+    </javac>
+  </target>
+  <target name="samples" depends="examples" description="alias for examples"/>
+
+
+  <!--====================================================================-->
+  <!-- Generates javadocs                                                 -->
+  <!--====================================================================-->
+  <target name="docs" description="generate API documentation">
+    <mkdir dir="${docs}"/>
+    <javadoc sourcepath="${src}"
+             destdir="${docs}"
+             Overview="${src}/overview.html"
+             Version="true"
+             Windowtitle="OpenForecast API"
+             Doctitle="OpenForecast"
+             bottom="&lt;a href='http://openforecast.sf.net/' target='_blank'&gt;OpenForecast&lt;/a&gt;, Copyright (c) &lt;a href='http://www.stevengould.org/' target='_blank'&gt;Steven Gould&lt;/a&gt;, 2002-2011">
+      <package name="net.sourceforge.openforecast.*" />
+      <link href="http://download.oracle.com/javase/1.5.0/docs/api/" />
+      <classpath refid="base.classpath" />
+    </javadoc>
+  </target>
+
+
+  <!--====================================================================-->
+  <!-- Builds distribution files                                          -->
+  <!--====================================================================-->
+  <target name="dist" depends="compile,docs,test"
+          description="generate the distribution" >
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}"/>
+
+    <!-- Put main library classes into the ${OpenForecast.jar} file -->
+    <jar jarfile="${OpenForecast.jar}"
+         basedir="${build}/classes"/>
+
+    <!-- Put UI classes into the ${OpenForecastUI.jar} file -->
+<!--
+    <jar jarfile="${OpenForecastUI.jar}"
+         basedir="${build}/ui"/>
+-->
+
+    <!-- Create source distribution in ${OpenForecast-src.jar} -->
+    <copy todir="${build}/OpenForecast-${version}/src"
+          preservelastmodified="true">
+      <fileset dir="${src}" />
+    </copy>
+    <copy todir="${build}/OpenForecast-${version}/examples"
+          preservelastmodified="true">
+      <fileset dir="${examples}" />
+    </copy>
+    <copy todir="${build}/OpenForecast-${version}/test"
+          preservelastmodified="true">
+      <fileset dir="${test-src}" />
+    </copy>
+    <copy todir="${build}/OpenForecast-${version}"
+          preservelastmodified="true">
+      <fileset dir="." includes="TODO README LICENSE build.xml" />
+    </copy>
+    <copy todir="${build}/OpenForecast-${version}/docs"
+          preservelastmodified="true">
+      <fileset dir="${docs}" />
+    </copy>
+    <copy todir="${build}/OpenForecast-${version}/lib"
+          preservelastmodified="true"
+          file="${jfreechart.jar}"/>
+    <copy todir="${build}/OpenForecast-${version}/lib"
+          preservelastmodified="true"
+          file="${jcommon.jar}"/>
+    <copy todir="${build}/OpenForecast-${version}/lib"
+          preservelastmodified="true"
+          file="${junit.jar}"/>
+    <jar destfile="${OpenForecast-src.jar}"
+         basedir="${build}" includes="OpenForecast-${version}/**"/>
+  </target>
+
+
+  <!--====================================================================-->
+  <!-- Deletes all temporary, class and distribution files                -->
+  <!--====================================================================-->
+  <target name="clean"
+          description="clean up" >
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+    <delete dir="${docs}"/>
+    <delete dir="test-src"/> <!-- Old location of test source code  -->
+    <delete verbose="true">  <!-- Old location of compiled examples -->
+      <fileset dir="${examples}" includes="**/*.class" />
+    </delete>
+    <delete verbose="true">
+      <fileset dir="." defaultexcludes="no" includes="**/*~" />
+      <fileset dir="." defaultexcludes="no" includes="**/.#*" />
+    </delete>
+  </target>
+</project>
+<!-- Local variables: -->
+<!-- tab-width: 4 -->
+<!-- End: -->

@@ -1,0 +1,3 @@
+This directory contains the source files for all OpenForecast test cases. To compile and run the tests, change to the parent directory (where the build.xml file exists) and type the following:
+
+	ant test

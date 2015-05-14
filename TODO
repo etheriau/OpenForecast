@@ -1,0 +1,98 @@
+OpenForecast 0.6 possible enhancements:
+- In RegressionModel, calculate p-value for coefficient of regression. Then provide accessor to get at that value.
+- In MultipleLinearRegressionModel, calculate p-value for each of the coefficients of regression. Then provide accessor to get at those values.
+- Refactor: change DataSet to implement a new interface DataSeries. Create TimeDataSet as a new sub-class of DataSet that implements a new interface, TimeSeries. For example:
+  public interface DataSeries...
+  public interface TimeSeries extends DataSeries...
+  public class DataSet implements DataSeries...
+  public class TimeDataSet extends DataSet implements TimeSeries...
+
+Other thoughts/ideas:
+* Modify CSVBuilder to try to read variable names from first line and, if fails, then read as data.
+* Add basic UI???
+* Add package.html to net.sourceforge.openforecast.ui.
+* Add some kind of in-sample testing for the accuracy indicator - using one part of the historical data to fit the model and another part to determine accuracy (suggested by Paul Mars).
+* Following conversation with Kirk Abbott, consider the definition of a Builder class that provides flexibility reading sparse data sets.
+* Implement the following models:
+   - Decomposition
+     - seasonality?
+     - trend?
+   - Box-Jenkins
+   - adpative filtering
+   - ARIMA (Kirk Abbott?)
+  Which one first, and in what order?
+* Consider adding ForecastingModel.getRecommendedNumberOfObservations()
+
+
+History / Change Log:
+====================
+
+
+0.5 (May 29, 2011):
+* Upgraded to use latest version of JFreeChart (1.0.13).
+* Implemented initial support for "Akaike Information Criterion" to AccuracyIndicators and Forecaster classes - suggested by Sajjad Daya, May 2011.
+* Overloaded Forecaster.getBestForecast to allow the user to select which of the evaluation criteria (bias, MAD, MAPE, MSE, SAE) to use, or provides a reasonable default - suggested by Paul Mars.
+* Updated to use J2SDK 1.5 Generics.
+* Modified Forecaster.getBestForecast to use one less than the sqrt of the number of observations as a guess at the order of the single variable polynomial model to fit. While providing a great fitting curve (and often the "best" fitting curve), the previous implementation also gave some wild future estimates. The new approach is more conservative, and favors more accurate future forecasts.
+* TripleExponentialSmoothingModel: Added/Improved validation of input parameters to getBestFitModel and init methods. Without this errors were a little cryptic at best.
+
+0.4 (March 31, 2004):
+* Modified source code distribution (defined by the "dist" target in build.xml) to include required library files.
+* Updated Forecaster class to consider Double and Triple Exponential Smoothing.
+* Re-organized test and examples source files, as well as build directories. Updated build.xml to support new structure.
+* Updated build.xml to separate out the build of the main library classes from the UI classes (still under development, and not part of the 0.4 release), the test cases and examples.
+* Updated build.xml to compile TimeSeries* helper classes (require JFreeChart.jar). Actually modified all targets to use a common CLASSPATH.
+* Added TimeSeriesBuilder and TimeSeriesOutputter (and a simple test cases for each).
+* Added a triple exponential smoothing model.
+* Updated examples to use JFreeChart 0.9.16 and JCommon 0.9.1.
+* Added the static SimpleExponentialSmoothing.getBestFitModel methods to select "best fit" value of alpha for a given data set.
+* Modified SimpleExponentialSmoothing.forecast to handle future time periods by extrapolation.
+* Added the static DoubleExponentialSmoothing.getBestFitModel methods to select "best fit" values of alpha and gamma for a given data set.
+* Modified DoubleExponentialSmoothing.forecast to handle future time periods by extrapolation.
+* Updated ExponentialSmoothingChartDemo to include forecast generated from a DoubleExponentialSmoothingModel model.
+* Added DoubleExponentialSmoothingModel extends AbstractTimeBasedModel.
+* Refactored SimpleExponentialSmoothingModel and WeightedMovingAverageModel to subclass new abstract class, AbstractTimeBasedModel.
+* Added Util.calculateSeasonalIndices() helper method to help with calculation of seasonal indices.
+* Added testContains, testHashCode, testRemove and testRetainAll to DataSetTest, and re-organized tests to make use of a common setUp and tearDown.
+* Modified DataSet to fully implement the java.util.Collection interface. So, DataSet now "is a" Collection.
+* Create new test class, DataSetTest and added testDataSetEqualsMethod. Moved the DataSet tests from BasicTest into this new class.
+* Implemented DataSet.equals(DataSet).
+* Implemented overridden equals method for DataSet.
+* Added a new package, org.sourceforge.openforecast.output, that will contain helper "outputter" classes. Defined Outputter interface, and implemented an initial DelimitedTextOutputter to output values from a DataSet to a delimited text file such as CSV file.
+* Added a new package, org.sourceforge.openforecast.input, that will contain helper "builder" classes. Defined Builder interface, and implemented an initial CSVBuilder to read CSV files and create a DataSet from the values. Also defined the outline to a ResultSetBuilder class.
+* Added getIntercept and getCoefficient methods to MultipleLinearRegressionModel class.
+* Added an SimpleExponentialSmoothingModel as subclass of WeightedMovingAverageModel.
+* Modified Observation.getIndependentValue to throw an IllegalArgumentException if an attempt was made to reference an independent variable unknown to the Observation.
+* Added sample of using OpenForecast with JFreeChart.
+* Modified build.xml to build example programs in build/classes.
+* Modified MovingAverageModel to subclass WeightedMovingAverageModel.
+* Implemented WeightedMovingAverageModel.
+* Modified to include support for J2SDK 1.3.
+
+0.3 (January 3, 2003):
+* Modified Forecaster to include support for MovingAverageModel, and created a suitable test case in MovingAverageTest.
+* Modified PolynomialRegressionTest to test the PolynomialRegressionModel instead of the underlying (package level) GaussElimination methods directly.
+* Added new class OpenForecastTestCase as base class for all test cases.
+* Added support for user-defined coefficient values in the MultipleLinearRegressionModel.
+* Changed MultipleLinearRegressionModel to use HashMap instead of LinkedHashMap (should now compile and run with J2SDK 1.3)
+* Redefined DataPoint as an interface, and implemented an Observation class that implements DataPoint.
+   *** REQUIRES CHANGING ANY CODE THAT INSTANTIATES DataPoint OBJECTS ***
+* Added TODO file to the src distribution.
+* Added a "naive forecasting model" - as a special case of the moving average model, where the number of periods is set to 1.
+* Added public String MovingAverageModel.getIndependentVariable().
+* Added a moving average forecasting model and 2 more test cases.
+* Added methods to DataSet that allow the user to educate the forecasting models about time series data (and period). This included addition of getters and setters for timeVariable and periodsPerYear, as well as a new constructor.
+* Forecaster now uses a combination of bias, MAD, MAPE, MSE and SAE to determine the "best" model. See Forecaster.betterThan method for implementation details.
+* Implemented AbstractForecastingModel.forecast( DataSet ) as a series of calls to AbstractForecastingModel.forecastDataPoint( DataPoint ). Can then be overridden only if the model can provide a more efficient implementation.
+* Added ForecastingModel.forecast(DataPoint) to forecast a single data point.
+* Added getBias(), getMAD(), getMAPE(), getMSE(), getSAE() to ForecastingModel interface, and implemented in AbstractForecastingModel
+* Modified PolynomialRegressionModel and MultipleLinearRegressionModel to extend new AbstractForecastingModel.
+
+0.2 (November 22, 2002):
+* Beta test code
+* First release build.
+* Included enhancements to basic framework, and the addition of a multiple variable linear regression model.
+
+0.1:
+* Alpha test code
+* Included basic framework, single variable linear regression model and a single variable polynomial regression mode.
