@@ -34,7 +34,7 @@ import net.sourceforge.openforecast.DataSet;
  * functionality used in validating test results.
  * @author Steven R. Gould
  */
-public class OpenForecastTestCase extends TestCase
+public abstract class OpenForecastTestCase extends TestCase
 {
     /**
      * The amount of error in the forecast values where the forecast is
