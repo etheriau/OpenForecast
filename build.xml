@@ -6,9 +6,9 @@
   <!-- Initialize global properties for this build -->
   <property name="version"    value="0.5.0"/>
 
-  <property name="src"        location="src"/>
+  <property name="src"        location="src/main/java"/>
   <property name="examples"   location="examples"/>
-  <property name="test-src"   location="test"/>
+  <property name="test-src"   location="src/test/java"/>
   <property name="lib"        location="lib"/>
 
   <property name="build"      location="build"/>
